@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercice — Aménagement d'un salon</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --oak: #C8A96E;
+    --oak-light: #E8D5B0;
+    --oak-dark: #8B6914;
+    --charcoal: #1C1C1E;
+    --slate: #3A3A3C;
+    --fog: #F5F2ED;
+    --white: #FDFCFA;
+    --muted: #8E8E93;
+    --success: #2D6A4F;
+    --success-bg: #D8F3DC;
+    --error: #9B2335;
+    --error-bg: #FDDDE6;
+    --warning: #7B5800;
+    --warning-bg: #FFF3CD;
+    --border: #DDD8D0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--fog);
+    color: var(--charcoal);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* === HEADER === */
+  .header {
+    background: var(--charcoal);
+    color: var(--white);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--oak);
+  }
+
+  .header-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .header-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--oak);
+    font-weight: 500;
+  }
+
+  .header-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--white);
+  }
+
+  /* Timer */
+  .timer-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  .timer-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .timer-display {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--oak);
+    letter-spacing: 2px;
+    transition: color 0.3s;
+  }
+
+  .timer-display.warning { color: #F4A261; }
+  .timer-display.danger { color: #E63946; animation: pulse 1s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* Progress bar */
+  .progress-bar-wrap {
+    background: var(--slate);
+    height: 3px;
+    width: 100%;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--oak);
+    transition: width 0.5s ease;
+  }
+
+  /* === MAIN === */
+  .main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+
+  /* Score summary pill */
+  .score-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--charcoal);
+    color: var(--oak);
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Énoncé */
+  .enonce-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--oak);
+    border-radius: 12px;
+    padding: 32px 36px;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .enonce-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle at top right, rgba(200,169,110,0.08), transparent);
+    pointer-events: none;
+  }
+
+  .enonce-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--oak-light);
+    color: var(--oak-dark);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+  }
+
+  .enonce-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    color: var(--charcoal);
+    margin-bottom: 4px;
+  }
+
+  .enonce-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  .enonce-text {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--slate);
+  }
+
+  .enonce-text p + p { margin-top: 12px; }
+
+  .data-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .data-item {
+    background: var(--fog);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+
+  .data-item-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .data-item-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--charcoal);
+  }
+
+  .data-item-note {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Plan du salon */
+  .plan-block {
+    margin-top: 24px;
+    background: var(--fog);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .plan-svg { max-width: 100%; }
+
+  /* Note brouillon */
+  .brouillon-note {
+    background: #FFFBEB;
+    border: 1px solid #F3D775;
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 32px;
+    font-size: 13.5px;
+    color: #6B4E0A;
+    line-height: 1.5;
+  }
+
+  .brouillon-note-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  /* === QUESTIONS === */
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--charcoal);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .questions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .question-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+
+  .question-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+  .question-card.correct { border-color: var(--success); }
+  .question-card.incorrect { border-color: var(--error); }
+  .question-card.locked { opacity: 0.85; }
+
+  .question-header {
+    padding: 18px 22px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .question-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--charcoal);
+    color: var(--white);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .question-card.correct .question-num { background: var(--success); }
+  .question-card.incorrect .question-num { background: var(--error); }
+
+  .question-body { flex: 1; }
+
+  .question-theme {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--oak);
+    margin-bottom: 4px;
+  }
+
+  .question-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--slate);
+  }
+
+  .question-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  .question-points {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .question-input-area {
+    padding: 0 22px 18px 68px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .input-field {
+    width: 160px;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    color: var(--charcoal);
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    text-align: right;
+  }
+
+  .input-field:focus {
+    border-color: var(--oak);
+    box-shadow: 0 0 0 3px rgba(200,169,110,0.15);
+  }
+
+  .input-field:disabled {
+    background: var(--fog);
+    cursor: not-allowed;
+  }
+
+  .input-unit {
+    font-size: 13px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .btn-validate {
+    padding: 10px 20px;
+    background: var(--charcoal);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+
+  .btn-validate:hover { background: var(--slate); }
+  .btn-validate:active { transform: scale(0.98); }
+  .btn-validate:disabled { background: var(--border); cursor: not-allowed; color: var(--muted); }
+
+  /* Feedback */
+  .feedback {
+    margin: 0 22px 16px 68px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    display: none;
+  }
+
+  .feedback.show { display: block; }
+  .feedback.success { background: var(--success-bg); color: var(--success); border: 1px solid #B7E4C7; }
+  .feedback.error { background: var(--error-bg); color: var(--error); border: 1px solid #F8B4C0; }
+
+  .feedback strong { font-weight: 700; }
+
+  /* === RÉSULTAT FINAL === */
+  .result-card {
+    display: none;
+    margin-top: 40px;
+    background: var(--charcoal);
+    color: var(--white);
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .result-card.show { display: block; }
+
+  .result-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(200,169,110,0.15), transparent 70%);
+    pointer-events: none;
+  }
+
+  .result-score-big {
+    font-family: 'DM Serif Display', serif;
+    font-size: 72px;
+    color: var(--oak);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .result-label {
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 24px;
+    letter-spacing: 1px;
+  }
+
+  .result-msg {
+    font-size: 18px;
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    color: var(--oak-light);
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  /* Fin du temps */
+  .time-over-banner {
+    display: none;
+    background: #E63946;
+    color: white;
+    text-align: center;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    position: sticky;
+    top: 73px;
+    z-index: 99;
+  }
+
+  .time-over-banner.show { display: block; }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .main { padding: 24px 16px 60px; }
+    .header-inner { padding: 12px 16px; }
+    .enonce-card { padding: 20px; }
+    .data-grid { grid-template-columns: 1fr 1fr; }
+    .question-input-area { flex-wrap: wrap; padding-left: 22px; }
+    .input-field { width: 120px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <span class="header-label">Bac Pro — Mathématiques & Aménagement</span>
+      <span class="header-title">Rénovation d'un salon : Chantier Moreau</span>
+    </div>
+    <div class="timer-block">
+      <span class="timer-label">Temps restant</span>
+      <span class="timer-display" id="timerDisplay">60:00</span>
+    </div>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+  </div>
+</header>
+
+<div class="time-over-banner" id="timeOverBanner">⏱ Temps écoulé — Plus aucune réponse n'est acceptée</div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- Score -->
+  <div class="score-pill" id="scorePill">0 / 0 pt</div>
+
+  <!-- Énoncé -->
+  <div class="enonce-card">
+    <div class="enonce-badge">📋 Mise en situation</div>
+    <h1 class="enonce-title">Le chantier de M. et Mme Moreau</h1>
+    <p class="enonce-subtitle">Aménagement intérieur · Pose de carrelage · Menuiserie</p>
+
+    <div class="enonce-text">
+      <p>M. et Mme Moreau font rénover leur salon-séjour dans leur maison de Saint-Étienne. Vous êtes l'assistant(e) du conducteur de travaux et vous devez établir les devis, les commandes de matériaux et planifier les coûts du chantier.</p>
+
+      <p>Le salon est de forme rectangulaire. Après avoir mesuré la pièce, vous disposez des informations suivantes :</p>
+    </div>
+
+    <div class="data-grid">
+      <div class="data-item">
+        <div class="data-item-label">Longueur du salon</div>
+        <div class="data-item-value">7,20 m</div>
+      </div>
+      <div class="data-item">
+        <div class="data-item-label">Largeur du salon</div>
+        <div class="data-item-value">4,50 m</div>
+      </div>
+      <div class="data-item">
+        <div class="data-item-label">Format du carrelage</div>
+        <div class="data-item-value">60 × 60 cm</div>
+        <div class="data-item-note">soit 0,36 m² par carreau</div>
+      </div>
+      <div class="data-item">
+        <div class="data-item-label">Prix carrelage</div>
+        <div class="data-item-value">18,50 €/m²</div>
+        <div class="data-item-note">hors taxes</div>
+      </div>
+      <div class="data-item">
+        <div class="data-item-label">Taux de TVA</div>
+        <div class="data-item-value">10 %</div>
+        <div class="data-item-note">travaux de rénovation</div>
+      </div>
+      <div class="data-item">
+        <div class="data-item-label">Coeff. de perte (chutes)</div>
+        <div class="data-item-value">+ 10 %</div>
+        <div class="data-item-note">à ajouter à la surface</div>
+      </div>
+      <div class="data-item">
+        <div class="data-item-label">Prix unitaire plinthe</div>
+        <div class="data-item-value">3,20 €/ml</div>
+        <div class="data-item-note">hors taxes</div>
+      </div>
+      <div class="data-item">
+        <div class="data-item-label">Remise accordée</div>
+        <div class="data-item-value">−8 %</div>
+        <div class="data-item-note">sur le carrelage uniquement</div>
+      </div>
+    </div>
+
+    <div class="enonce-text" style="margin-top:20px;">
+      <p>Les plinthes sont posées sur les 4 côtés du salon. La porte d'entrée fait 90 cm de large — il ne faut <strong>pas</strong> poser de plinthe à cet endroit. Le couloir adjacent fait 1,20 m de large et sa porte est également à déduire.</p>
+      <p>Pour finir, le client souhaite ajouter une <strong>bibliothèque encastrée</strong> sur le mur de 4,50 m. Sa largeur initiale prévue était de 1,20 m. Suite à une demande de modification, la largeur augmente de <strong>15 %</strong>.</p>
+    </div>
+  </div>
+
+  <!-- Note brouillon -->
+  <div class="brouillon-note">
+    <span class="brouillon-note-icon">📝</span>
+    <div><strong>Prenez votre feuille de brouillon.</strong> Posez vos calculs, vos équations et vos raisonnements dessus. Entrez <strong>uniquement le résultat numérique</strong> dans chaque champ ci-dessous. Relisez bien la question pour connaître l'unité demandée.</div>
+  </div>
+
+  <!-- Questions -->
+  <div class="section-title">Questions</div>
+
+  <div class="questions-list" id="questionsList"></div>
+
+  <!-- Résultat final -->
+  <div class="result-card" id="resultCard">
+    <div class="result-score-big" id="resultScore">—</div>
+    <div class="result-label">Points obtenus</div>
+    <div class="result-msg" id="resultMsg">—</div>
+  </div>
+
+</main>
+
+<script>
+// =====================================================================
+// DONNÉES DES QUESTIONS
+// =====================================================================
+const QUESTIONS = [
+  {
+    id: 1,
+    theme: "Géométrie — Surface",
+    text: "Calculez la superficie totale (surface au sol) du salon en m².",
+    hint: "Superficie = longueur × largeur",
+    answer: 32.4,
+    tolerance: 0.05,
+    unit: "m²",
+    points: 1,
+    feedback_ok: "Correct ! 7,20 × 4,50 = 32,40 m². C'est la base de tout le chantier.",
+    feedback_err: "Relisez les données : longueur = 7,20 m, largeur = 4,50 m. Multipliez-les."
+  },
+  {
+    id: 2,
+    theme: "Calcul commercial — Augmentation",
+    text: "La surface à carrelaer doit intégrer une marge de 10 % pour les chutes et les découpes. Quelle est la surface à commander (en m²) ?",
+    hint: "Surface + 10 % = Surface × 1,10",
+    answer: 35.64,
+    tolerance: 0.05,
+    unit: "m²",
+    points: 1,
+    feedback_ok: "Parfait ! 32,40 × 1,10 = 35,64 m².",
+    feedback_err: "Il faut augmenter 32,40 m² de 10 %. Multipliez par 1,10."
+  },
+  {
+    id: 3,
+    theme: "Équation — Nombre de carreaux",
+    text: "Chaque carreau mesure 60 cm × 60 cm, soit 0,36 m². Posez une équation pour trouver le nombre exact de carreaux nécessaires pour couvrir 35,64 m² (sans arrondir encore).",
+    hint: "n × 0,36 = 35,64 → n = ?",
+    answer: 99,
+    tolerance: 0.1,
+    unit: "carreaux (valeur exacte)",
+    points: 2,
+    feedback_ok: "Bien joué ! 35,64 ÷ 0,36 = 99 carreaux exactement.",
+    feedback_err: "Divisez 35,64 par 0,36. Le résultat est un nombre entier ici."
+  },
+  {
+    id: 4,
+    theme: "Arrondi — Commande réelle",
+    text: "Dans la réalité, les carreaux se vendent à l'unité. Si votre résultat avait été 99,3 carreaux, combien auriez-vous dû en commander ? (Répondez avec cette valeur hypothétique de 99,3)",
+    hint: "On arrondit toujours au supérieur pour ne pas manquer de matériau.",
+    answer: 100,
+    tolerance: 0.1,
+    unit: "carreaux à commander",
+    points: 1,
+    feedback_ok: "Exact ! 99,3 → on commande 100 carreaux. En chantier, on arrondit toujours à l'entier supérieur.",
+    feedback_err: "99,3 carreaux → il faut arrondir AU SUPÉRIEUR car 99 carreaux ne suffiraient pas. Réponse : 100."
+  },
+  {
+    id: 5,
+    theme: "Calcul commercial — Prix HT",
+    text: "Calculez le prix HT du carrelage pour 35,64 m², sachant que le prix est de 18,50 €/m².",
+    hint: "Prix HT = surface × prix unitaire",
+    answer: 659.34,
+    tolerance: 0.05,
+    unit: "€ HT",
+    points: 1,
+    feedback_ok: "Correct ! 35,64 × 18,50 = 659,34 € HT.",
+    feedback_err: "Multipliez la surface (35,64 m²) par le prix au m² (18,50 €)."
+  },
+  {
+    id: 6,
+    theme: "Calcul commercial — Remise",
+    text: "Le fournisseur accorde une remise de 8 % sur le carrelage. Calculez le prix HT après remise.",
+    hint: "Prix après remise = Prix HT × (1 − 0,08) = Prix HT × 0,92",
+    answer: 606.59,
+    tolerance: 0.1,
+    unit: "€ HT après remise",
+    points: 2,
+    feedback_ok: "Bravo ! 659,34 × 0,92 = 606,59 € HT après remise.",
+    feedback_err: "Appliquez −8 % : multipliez 659,34 par 0,92."
+  },
+  {
+    id: 7,
+    theme: "Calcul commercial — TVA",
+    text: "La TVA est de 10 % sur les travaux de rénovation. Calculez le montant TTC à payer pour le carrelage (après remise).",
+    hint: "Prix TTC = Prix HT × 1,10",
+    answer: 667.25,
+    tolerance: 0.1,
+    unit: "€ TTC",
+    points: 2,
+    feedback_ok: "Parfait ! 606,59 × 1,10 = 667,25 € TTC.",
+    feedback_err: "Multipliez le prix HT après remise (606,59 €) par 1,10 pour ajouter 10 % de TVA."
+  },
+  {
+    id: 8,
+    theme: "Géométrie — Périmètre & Plinthes",
+    text: "Les plinthes sont posées sur les 4 côtés du salon. On retire l'ouverture de la porte d'entrée (0,90 m) et la porte du couloir (1,20 m). Calculez la longueur totale de plinthe à poser (en mètres linéaires).",
+    hint: "Périmètre = 2 × (longueur + largeur). Puis retirez les deux ouvertures.",
+    answer: 21.3,
+    tolerance: 0.05,
+    unit: "mètres linéaires",
+    points: 2,
+    feedback_ok: "Correct ! Périmètre = 2 × (7,20 + 4,50) = 23,40 m. Moins 0,90 et 1,20 → 23,40 − 2,10 = 21,30 ml.",
+    feedback_err: "Calculez d'abord le périmètre (2 × 11,70 = 23,40 m), puis retirez 0,90 + 1,20 = 2,10 m."
+  },
+  {
+    id: 9,
+    theme: "Calcul commercial — Coût plinthes",
+    text: "Les plinthes coûtent 3,20 €/ml HT. Calculez le coût total HT des plinthes (sans remise, sans TVA).",
+    hint: "Coût = longueur × prix unitaire",
+    answer: 68.16,
+    tolerance: 0.05,
+    unit: "€ HT",
+    points: 1,
+    feedback_ok: "Exact ! 21,30 × 3,20 = 68,16 € HT.",
+    feedback_err: "Multipliez 21,30 ml par 3,20 €/ml."
+  },
+  {
+    id: 10,
+    theme: "Augmentation — Bibliothèque",
+    text: "La bibliothèque encastrée avait une largeur prévue de 1,20 m. Suite à la demande du client, elle augmente de 15 %. Quelle est la nouvelle largeur (en cm) ?",
+    hint: "Nouvelle valeur = valeur initiale × 1,15. Convertissez en cm.",
+    answer: 138,
+    tolerance: 0.5,
+    unit: "cm",
+    points: 2,
+    feedback_ok: "Parfait ! 1,20 m × 1,15 = 1,38 m = 138 cm.",
+    feedback_err: "1,20 × 1,15 = 1,38 m. Convertissez en cm : 138 cm."
+  },
+  {
+    id: 11,
+    theme: "Synthèse — Budget total",
+    text: "Calculez le budget total TTC du chantier (carrelage TTC après remise + plinthes HT avec TVA à 10 %). Arrondissez au centime.",
+    hint: "Budget = carrelage TTC + plinthes TTC. Plinthes TTC = 68,16 × 1,10",
+    answer: 742.23,
+    tolerance: 0.1,
+    unit: "€ TTC",
+    points: 3,
+    feedback_ok: "Excellent ! Carrelage TTC = 667,25 €. Plinthes TTC = 68,16 × 1,10 = 74,98 €. Total = 667,25 + 74,98 = 742,23 € TTC.",
+    feedback_err: "Pensez à ajouter la TVA (10 %) sur les plinthes aussi. Plinthes TTC = 68,16 × 1,10 = 74,98 €. Puis additionnez avec 667,25 €."
+  }
+];
+
+// =====================================================================
+// ÉTAT
+// =====================================================================
+let answered = new Array(QUESTIONS.length).fill(false);
+let correctAnswers = new Array(QUESTIONS.length).fill(false);
+let totalPoints = 0;
+let maxPoints = QUESTIONS.reduce((s, q) => s + q.points, 0);
+let timeOver = false;
+
+// =====================================================================
+// RENDU DES QUESTIONS
+// =====================================================================
+function renderQuestions() {
+  const list = document.getElementById('questionsList');
+  list.innerHTML = '';
+  QUESTIONS.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `qcard-${i}`;
+    card.innerHTML = `
+      <div class="question-header">
+        <div class="question-num" id="qnum-${i}">${i + 1}</div>
+        <div class="question-body">
+          <div class="question-theme">${q.theme}</div>
+          <div class="question-text">${q.text}</div>
+          <div class="question-hint">${q.hint}</div>
+        </div>
+        <div class="question-points">${q.points} pt${q.points > 1 ? 's' : ''}</div>
+      </div>
+      <div class="question-input-area">
+        <div class="input-wrapper">
+          <input type="number" step="any" class="input-field" id="input-${i}" placeholder="0" ${timeOver ? 'disabled' : ''}>
+          <span class="input-unit">${q.unit}</span>
+        </div>
+        <button class="btn-validate" id="btn-${i}" onclick="validate(${i})">Valider</button>
+      </div>
+      <div class="feedback" id="feedback-${i}"></div>
+    `;
+    list.appendChild(card);
+
+    // Enter key
+    const input = card.querySelector(`#input-${i}`);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') validate(i);
+    });
+  });
+  updateScorePill();
+}
+
+// =====================================================================
+// VALIDATION
+// =====================================================================
+function validate(i) {
+  if (timeOver || answered[i]) return;
+
+  const q = QUESTIONS[i];
+  const inputEl = document.getElementById(`input-${i}`);
+  const val = parseFloat(inputEl.value.replace(',', '.'));
+
+  if (isNaN(val)) {
+    inputEl.focus();
+    return;
+  }
+
+  answered[i] = true;
+  const isCorrect = Math.abs(val - q.answer) <= q.tolerance;
+  correctAnswers[i] = isCorrect;
+  if (isCorrect) totalPoints += q.points;
+
+  // Lock input
+  inputEl.disabled = true;
+  document.getElementById(`btn-${i}`).disabled = true;
+
+  // Feedback
+  const fb = document.getElementById(`feedback-${i}`);
+  fb.className = `feedback show ${isCorrect ? 'success' : 'error'}`;
+  if (isCorrect) {
+    fb.innerHTML = `<strong>✓ Bonne réponse !</strong> ${q.feedback_ok}`;
+  } else {
+    fb.innerHTML = `<strong>✗ Réponse incorrecte</strong> (vous avez entré : ${val} ${q.unit})<br>${q.feedback_err}<br><em>Réponse attendue : <strong>${q.answer} ${q.unit}</strong></em>`;
+  }
+
+  // Card style
+  const card = document.getElementById(`qcard-${i}`);
+  card.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+  updateScorePill();
+  updateProgressBar();
+
+  // Fin si tout répondu
+  if (answered.every(Boolean)) showResult();
+}
+
+// =====================================================================
+// UI HELPERS
+// =====================================================================
+function updateScorePill() {
+  const done = answered.filter(Boolean).length;
+  const pts = totalPoints;
+  document.getElementById('scorePill').textContent = `${pts} / ${maxPoints} pt${maxPoints > 1 ? 's' : ''}  —  ${done} / ${QUESTIONS.length} questions`;
+}
+
+function updateProgressBar() {
+  const done = answered.filter(Boolean).length;
+  const pct = (done / QUESTIONS.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+function showResult() {
+  const card = document.getElementById('resultCard');
+  const scoreEl = document.getElementById('resultScore');
+  const msgEl = document.getElementById('resultMsg');
+
+  const pct = totalPoints / maxPoints;
+  let msg;
+  if (pct >= 0.9) msg = "Excellent travail ! Vous avez une très bonne maîtrise du chantier.";
+  else if (pct >= 0.75) msg = "Bon résultat ! Quelques points à retravailler, mais vous êtes sur la bonne voie.";
+  else if (pct >= 0.5) msg = "Travail moyen — relisez les méthodes de calcul de pourcentage et d'arrondi.";
+  else msg = "Des progrès sont nécessaires. Reprenez le cours sur les augmentations et les prix TTC.";
+
+  scoreEl.textContent = `${totalPoints} / ${maxPoints}`;
+  msgEl.textContent = msg;
+  card.classList.add('show');
+  card.scrollIntoView({ behavior: 'smooth' });
+}
+
+// =====================================================================
+// MINUTEUR — 60 minutes
+// =====================================================================
+const DURATION = 60 * 60; // secondes
+let remaining = DURATION;
+let timerInterval;
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    remaining--;
+    const el = document.getElementById('timerDisplay');
+    el.textContent = formatTime(remaining);
+
+    // Couleur
+    const pct = remaining / DURATION;
+    el.className = 'timer-display';
+    if (pct < 0.1) el.classList.add('danger');
+    else if (pct < 0.25) el.classList.add('warning');
+
+    if (remaining <= 0) {
+      clearInterval(timerInterval);
+      endTime();
+    }
+  }, 1000);
+}
+
+function endTime() {
+  timeOver = true;
+  document.getElementById('timerDisplay').textContent = '00:00';
+  document.getElementById('timerDisplay').className = 'timer-display danger';
+  document.getElementById('timeOverBanner').classList.add('show');
+
+  // Désactiver tout
+  document.querySelectorAll('.input-field, .btn-validate').forEach(el => {
+    el.disabled = true;
+  });
+
+  // Auto-corriger les non-répondues
+  QUESTIONS.forEach((q, i) => {
+    if (!answered[i]) {
+      answered[i] = true;
+      correctAnswers[i] = false;
+      const card = document.getElementById(`qcard-${i}`);
+      card.classList.add('incorrect');
+      const fb = document.getElementById(`feedback-${i}`);
+      fb.className = 'feedback show error';
+      fb.innerHTML = `<strong>Temps écoulé.</strong> La réponse attendue était : <strong>${q.answer} ${q.unit}</strong>`;
+    }
+  });
+
+  updateScorePill();
+  updateProgressBar();
+  showResult();
+}
+
+// =====================================================================
+// INIT
+// =====================================================================
+renderQuestions();
+startTimer();
+</script>
+</body>
+</html>
